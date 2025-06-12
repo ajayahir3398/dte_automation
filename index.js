@@ -41,11 +41,13 @@ async function startAutomation(username, password) {
 
   const browser = await chromium.launch({
     headless: true,
-    executablePath: isDocker ? '/usr/bin/google-chrome-stable' : undefined,
     args: [
       '--no-sandbox',
-      '--autoplay-policy=no-user-gesture-required',
-      '--disable-setuid-sandbox'
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu',
+      '--window-size=1920x1080'
     ]
   });
 
