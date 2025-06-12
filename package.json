@@ -4,11 +4,13 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "npx playwright install --with-deps",
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.2",
-    "playwright": "^1.44.0",
-    "cors": "^2.8.5"
+    "nodemon": "^3.1.10",
+    "playwright": "^1.44.0"
   }
 }
