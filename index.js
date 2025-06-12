@@ -50,7 +50,7 @@ async function startAutomation(username, password) {
     await page.click('button.van-button--danger');
     log("Login submitted");
     await page.waitForTimeout(2000);  // wait for login success
-    await page.screenshot({ path: 'afterLogin.png', fullPage: true });
+    // await page.screenshot({ path: 'afterLogin.png', fullPage: true });
 
     // TODO: Check login success, navigate to ads page
     for (let i = 0; i < 5; i++) {
