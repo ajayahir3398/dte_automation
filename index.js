@@ -1,9 +1,14 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { chromium } = require('playwright');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+
+// Serve static files from /public
+app.use(express.static(path.join(__dirname, 'public')));
 
 let logs = [];
 let isRunning = false;
@@ -13,9 +18,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Optional: serve index.html at root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Utility to log and store logs
 function log(message) {
-  console.log(message);
+  // console.log(message);
   logs.push(`${new Date().toISOString()} - ${message}`);
   if (logs.length > 1000) logs.shift(); // prevent memory overflow
 }
