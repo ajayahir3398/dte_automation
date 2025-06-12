@@ -37,27 +37,24 @@ async function startAutomation(username, password) {
   isRunning = true;
   log("Automation started");
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless: false });
   const context = await browser.newContext();
   const page = await context.newPage();
 
   try {
-    log("Starting login process");
     await page.goto('https://dteworks.com/xml/index.html#/login');
     log("Navigated to DTEWorks");
+    log("Starting login process");
 
     await page.fill('input[type="tel"][placeholder="Please enter your phone number"]', username);
+    log(`Filled phone number`);
     await page.fill('input[type="password"][placeholder="Please enter login password"]', password);
+    log(`Filled password`);
 
     await page.click('button.van-button--danger');
-    log("Login submitted");
-    log('Waiting 2 seconds for home page to load');
+    log("Clicked login button");
     await page.waitForLoadState('networkidle');  // wait for login success
     await page.screenshot({ path: 'afterLogin.png', fullPage: true });
-
-    if (!await waitForElement('.van-tabbar')) {
-      throw new Error('Task tabbar not found');
-    }
 
     // Navigate to task tab
     await page.evaluate(() => {
@@ -68,15 +65,13 @@ async function startAutomation(username, password) {
       }
     });
 
-    await page.waitForLoadState('networkidle');
-    log('Navigated to Task page');
-
-    log('Waiting 2 seconds for page to load');
+    log('Waiting 2 seconds for task page to load');
     await wait(2000);
     await page.screenshot({ path: 'afterTaskTab.png', fullPage: true });
+    log('Navigated to Task page');
 
     let remainingTasksCount = await getRemainingTasksCount(page);
-    log('Remaining tasks count:', remainingTasksCount);
+    log(`Remaining tasks count: ${remainingTasksCount}`);
 
     while (remainingTasksCount > 0) {
       const result = await handleSingleTask(page);
@@ -85,7 +80,7 @@ async function startAutomation(username, password) {
       }
       // Update the count after each task
       remainingTasksCount = await getRemainingTasksCount(page);
-      log('Remaining tasks count:', remainingTasksCount);
+      log(`Remaining tasks count: ${remainingTasksCount}`);
     }
 
     log('All today\'s tasks completed successfully');
@@ -113,7 +108,7 @@ async function getRemainingTasksCount(page) {
     const count = match ? parseInt(match[1]) : 0;
     return count;
   } catch (error) {
-    log('Error getting remaining tasks count:', error.message);
+    log(`Error getting remaining tasks count: ${error.message}`);
     return 0;
   }
 }
@@ -153,7 +148,7 @@ async function handleSingleTask(page) {
       }
       return '';
     });
-    log('Advertisement text:', adText);
+    log(`Advertisement text: ${adText}`);
 
     // Handle video playback with retry
     let videoSuccess = false;
@@ -162,10 +157,6 @@ async function handleSingleTask(page) {
 
     while (!videoSuccess && videoRetryCount < maxVideoRetries) {
       try {
-        if (!await waitForElement(page, 'div[data-v-1d18d737].taskVideo')) {
-          throw new Error('Video element not found');
-        }
-
         await page.evaluate(() => {
           const playButton = document.querySelector('.vjs-big-play-button');
           if (playButton) {
@@ -191,7 +182,7 @@ async function handleSingleTask(page) {
           }
         }
       } catch (error) {
-        log('Error during video playback:', error.message);
+        log(`Error during video playback: ${error.message}`);
         videoRetryCount++;
         if (videoRetryCount < maxVideoRetries) {
           await wait(1000);
@@ -212,7 +203,7 @@ async function handleSingleTask(page) {
 
     // Check remaining tasks
     const remainingTasksCount = await getRemainingTasksCount(page);
-    log('Remaining tasks count:', remainingTasksCount);
+    log(`Remaining tasks count: ${remainingTasksCount}`);
 
     if (remainingTasksCount > 0) {
       // Instead of recursive call, return to performTasks
@@ -223,7 +214,7 @@ async function handleSingleTask(page) {
     }
 
   } catch (error) {
-    log('Error in handleSingleTask:', error.message);
+    log(`Error in handleSingleTask: ${error.message}`);
     throw error;
   }
 }
@@ -233,7 +224,7 @@ async function waitForElement(page, selector, timeout = 30000) {
     await page.waitForSelector(selector, { visible: true, timeout });
     return true;
   } catch (error) {
-    log(`Element not found: ${selector}`, error.message);
+    log(`Element not found: ${selector} ${error.message}`);
     return false;
   }
 }
