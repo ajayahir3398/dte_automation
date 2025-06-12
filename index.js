@@ -37,7 +37,18 @@ async function startAutomation(username, password) {
   isRunning = true;
   log("Automation started");
 
-  const browser = await chromium.launch({ headless: true });
+  const isDocker = process.env.IS_DOCKER === 'true';
+
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath: isDocker ? '/usr/bin/google-chrome-stable' : undefined,
+    args: [
+      '--no-sandbox',
+      '--autoplay-policy=no-user-gesture-required',
+      '--disable-setuid-sandbox'
+    ]
+  });
+
   const context = await browser.newContext();
   const page = await context.newPage();
 
